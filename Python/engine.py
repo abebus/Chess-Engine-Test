@@ -1251,41 +1251,33 @@ def getBishopMovesSeparate(square, combined_occ): #{
 
 
 def Is_Square_Attacked_By_Black(square: int, occupancy: int) -> bool:
-    bishop_attacks = getBishopMovesSeparate(square, occupancy)
-    rook_attacks = getRookMovesSeparate(square, occupancy)
     return (
         (pieceArray[BP] & WHITE_PAWN_ATTACKS[square]) != 0 or
         (pieceArray[BN] & KNIGHT_ATTACKS[square]) != 0 or
         (pieceArray[BK] & KING_ATTACKS[square]) != 0 or
-        (pieceArray[BB] & bishop_attacks) != 0 or
+        (pieceArray[BB] & (bishop_attacks := getBishopMovesSeparate(square, occupancy))) != 0 or
         (pieceArray[BQ] & bishop_attacks) != 0 or
-        (pieceArray[BR] & rook_attacks) != 0 or
+        (pieceArray[BR]  & (rook_attacks := getRookMovesSeparate(square, occupancy))) != 0 or
         (pieceArray[BQ] & rook_attacks) != 0
     )
 
 def Is_Square_Attacked_By_White(square: int, occupancy: int) -> bool:
-    bishop_attacks = getBishopMovesSeparate(square, occupancy)
-    rook_attacks = getRookMovesSeparate(square, occupancy)
     return (
         (pieceArray[WP] & BLACK_PAWN_ATTACKS[square]) != 0 or
         (pieceArray[WN] & KNIGHT_ATTACKS[square]) != 0 or
         (pieceArray[WK] & KING_ATTACKS[square]) != 0 or
-        (pieceArray[WB] & bishop_attacks) != 0 or
+        (pieceArray[WB] & (bishop_attacks := getBishopMovesSeparate(square, occupancy))) != 0 or
         (pieceArray[WQ] & bishop_attacks) != 0 or
-        (pieceArray[WR] & rook_attacks) != 0 or
+        (pieceArray[WR] & (rook_attacks := getRookMovesSeparate(square, occupancy))) != 0 or
         (pieceArray[WQ] & rook_attacks) != 0
     )
+
 
 def BitscanForward(bb: int):
     return (bb & -bb).bit_length() - 1 if bb != 0 else -1
 
 
 def SetStartingPosition(): #{
-	global ep
-	global whiteToPlay
-
-	ep = NO_SQUARE;
-	whiteToPlay = True;
 	castleRights[0] = True;
 	castleRights[1] = True;
 	castleRights[2] = True;
@@ -1343,12 +1335,8 @@ def PrintBoard():
 	print();
 #}
 
-def PerftInline(depth: int, ply: int) -> int:
+def PerftInline(depth: int, ply: int, whiteToPlay, ep) -> int:
 #{
-
-	global whiteToPlay;
-	global ep;
-
 	piece_array_local =  array.array('Q', [
 			pieceArray[0], 
 			pieceArray[1],
@@ -1713,22 +1701,25 @@ def PerftInline(depth: int, ply: int) -> int:
 							moveList[moveCount][MOVE_TARGET] = startingSquare - 8
 							moveList[moveCount][MOVE_TAG] = TAG_WQueenPromotion
 							moveList[moveCount][MOVE_PIECE] = WP
+							moveCount+=1;
 
 							moveList[moveCount][MOVE_STARTING] = startingSquare
 							moveList[moveCount][MOVE_TARGET] = startingSquare - 8
 							moveList[moveCount][MOVE_TAG] = TAG_WRookPromotion
 							moveList[moveCount][MOVE_PIECE] = WP
+							moveCount+=1;
 
 							moveList[moveCount][MOVE_STARTING] = startingSquare
 							moveList[moveCount][MOVE_TARGET] = startingSquare - 8
 							moveList[moveCount][MOVE_TAG] = TAG_WBishopPromotion
 							moveList[moveCount][MOVE_PIECE] = WP
+							moveCount+=1;
 
 							moveList[moveCount][MOVE_STARTING] = startingSquare
 							moveList[moveCount][MOVE_TARGET] = startingSquare - 8
 							moveList[moveCount][MOVE_TAG] = TAG_WKnightPromotion
 							moveList[moveCount][MOVE_PIECE] = WP
-							moveCount+=4;
+							moveCount+=1;
 
 						#} 
 						else: #{
@@ -1770,22 +1761,25 @@ def PerftInline(depth: int, ply: int) -> int:
 						moveList[moveCount][MOVE_TARGET] = targetSquare
 						moveList[moveCount][MOVE_TAG] = TAG_WCaptureQueenPromotion
 						moveList[moveCount][MOVE_PIECE] = WP
-
+						moveCount+=1;
+						
 						moveList[moveCount][MOVE_STARTING] = startingSquare
 						moveList[moveCount][MOVE_TARGET] = targetSquare
 						moveList[moveCount][MOVE_TAG] = TAG_WCaptureRookPromotion
 						moveList[moveCount][MOVE_PIECE] = WP
+						moveCount+=1;
 
 						moveList[moveCount][MOVE_STARTING] = startingSquare
 						moveList[moveCount][MOVE_TARGET] = targetSquare
 						moveList[moveCount][MOVE_TAG] = TAG_WCaptureBishopPromotion
 						moveList[moveCount][MOVE_PIECE] = WP
+						moveCount+=1;
 
 						moveList[moveCount][MOVE_STARTING] = startingSquare
 						moveList[moveCount][MOVE_TARGET] = targetSquare
 						moveList[moveCount][MOVE_TAG] = TAG_WCaptureKnightPromotion
 						moveList[moveCount][MOVE_PIECE] = WP
-						moveCount+=4;
+						moveCount+=1;
 					#} 
 					else: #{
 
@@ -2120,11 +2114,12 @@ def PerftInline(depth: int, ply: int) -> int:
 				if (piece_array_local[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 or \
 				(piece_array_local[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 or \
 				(piece_array_local[WK] & KING_ATTACKS[targetSquare]) != 0 or \
-				(piece_array_local[WB] & getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
-				(piece_array_local[WQ] & getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
-				(piece_array_local[WR] & getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
-				(piece_array_local[WQ] & getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0:
+				(piece_array_local[WB] & (bishop_moves := getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing))) != 0 or \
+				(piece_array_local[WQ] & bishop_moves) != 0 or \
+				(piece_array_local[WR] & (rook_moves := getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing))) != 0 or \
+				(piece_array_local[WQ] & rook_moves) != 0:
 					continue
+
 
 
 				moveList[moveCount][MOVE_STARTING] = startingSquare
@@ -2143,10 +2138,10 @@ def PerftInline(depth: int, ply: int) -> int:
 				if (piece_array_local[WP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 or \
 				(piece_array_local[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 or \
 				(piece_array_local[WK] & KING_ATTACKS[targetSquare]) != 0 or \
-				(piece_array_local[WB] & getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
-				(piece_array_local[WQ] & getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
-				(piece_array_local[WR] & getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
-				(piece_array_local[WQ] & getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0:
+				(piece_array_local[WB] & (bishop_moves := getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing))) != 0 or \
+				(piece_array_local[WQ] & bishop_moves) != 0 or \
+				(piece_array_local[WR] & (rook_moves := getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing))) != 0 or \
+				(piece_array_local[WQ] & rook_moves) != 0:
 					continue
 
 
@@ -2187,22 +2182,25 @@ def PerftInline(depth: int, ply: int) -> int:
 							moveList[moveCount][MOVE_TARGET] = startingSquare + 8
 							moveList[moveCount][MOVE_TAG] = TAG_BBishopPromotion
 							moveList[moveCount][MOVE_PIECE] = BP
+							moveCount+=1;
 
 							moveList[moveCount][MOVE_STARTING] = startingSquare
 							moveList[moveCount][MOVE_TARGET] = startingSquare + 8
 							moveList[moveCount][MOVE_TAG] = TAG_BKnightPromotion
 							moveList[moveCount][MOVE_PIECE] = BP
+							moveCount+=1;
 
 							moveList[moveCount][MOVE_STARTING] = startingSquare
 							moveList[moveCount][MOVE_TARGET] = startingSquare + 8
 							moveList[moveCount][MOVE_TAG] = TAG_BRookPromotion
 							moveList[moveCount][MOVE_PIECE] = BP
+							moveCount+=1;
 
 							moveList[moveCount][MOVE_STARTING] = startingSquare
 							moveList[moveCount][MOVE_TARGET] = startingSquare + 8
 							moveList[moveCount][MOVE_TAG] = TAG_BQueenPromotion
 							moveList[moveCount][MOVE_PIECE] = BP
-							moveCount+=4;
+							moveCount+=1;
 						#} 
 						else: #{
 
@@ -2243,22 +2241,25 @@ def PerftInline(depth: int, ply: int) -> int:
 						moveList[moveCount][MOVE_TARGET] = targetSquare
 						moveList[moveCount][MOVE_TAG] = TAG_BCaptureQueenPromotion
 						moveList[moveCount][MOVE_PIECE] = BP
-
+						moveCount+=1
+						
 						moveList[moveCount][MOVE_STARTING] = startingSquare
 						moveList[moveCount][MOVE_TARGET] = targetSquare
 						moveList[moveCount][MOVE_TAG] = TAG_BCaptureRookPromotion
 						moveList[moveCount][MOVE_PIECE] = BP
-
+						moveCount+=1
+						
 						moveList[moveCount][MOVE_STARTING] = startingSquare
 						moveList[moveCount][MOVE_TARGET] = targetSquare
 						moveList[moveCount][MOVE_TAG] = TAG_BCaptureKnightPromotion
 						moveList[moveCount][MOVE_PIECE] = BP
-
+						moveCount+=1
+						
 						moveList[moveCount][MOVE_STARTING] = startingSquare
 						moveList[moveCount][MOVE_TARGET] = targetSquare
 						moveList[moveCount][MOVE_TAG] = TAG_BCaptureBishopPromotion
 						moveList[moveCount][MOVE_PIECE] = BP
-						moveCount+=4
+						moveCount+=1
 					#} 
 					else: #{
 
@@ -2498,14 +2499,16 @@ def PerftInline(depth: int, ply: int) -> int:
 				tempAttack &= tempAttack - 1
 
 				occupancyWithoutBlackKing = COMBINED_OCCUPANCIES & (~piece_array_local[BK])
+
 				if (piece_array_local[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 or \
 				(piece_array_local[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 or \
 				(piece_array_local[WK] & KING_ATTACKS[targetSquare]) != 0 or \
-				(piece_array_local[WB] & getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
-				(piece_array_local[WQ] & getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
-				(piece_array_local[WR] & getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
-				(piece_array_local[WQ] & getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0:
+				(piece_array_local[WB] & (bishop_moves := getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing))) != 0 or \
+				(piece_array_local[WQ] & bishop_moves) != 0 or \
+				(piece_array_local[WR] & (rook_moves := getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing))) != 0 or \
+				(piece_array_local[WQ] & rook_moves) != 0:
 					continue
+
 
 				moveList[moveCount][MOVE_STARTING] = blackKingPosition
 				moveList[moveCount][MOVE_TARGET] = targetSquare
@@ -2525,10 +2528,10 @@ def PerftInline(depth: int, ply: int) -> int:
 				if (piece_array_local[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 or \
 				(piece_array_local[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 or \
 				(piece_array_local[WK] & KING_ATTACKS[targetSquare]) != 0 or \
-				(piece_array_local[WB] & getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
-				(piece_array_local[WQ] & getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
-				(piece_array_local[WR] & getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
-				(piece_array_local[WQ] & getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0:
+				(piece_array_local[WB] & (bishop_moves := getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing))) != 0 or \
+				(piece_array_local[WQ] & bishop_moves) != 0 or \
+				(piece_array_local[WR] & (rook_moves := getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing))) != 0 or \
+				(piece_array_local[WQ] & rook_moves) != 0:
 					continue
 
 
@@ -2800,41 +2803,26 @@ def PerftInline(depth: int, ply: int) -> int:
 		#} 
 		elif piece == WR: #{
 
-			if castleRights[WKS_CASTLE_RIGHTS] : #{
-
-				if (pieceArray[WR] & SQUARE_BBS[H1]) == 0: #{
-
-					castleRights[WKS_CASTLE_RIGHTS] = False
-				#}
+			if castleRights[WKS_CASTLE_RIGHTS] and (pieceArray[WR] & SQUARE_BBS[H1]) == 0: #{
+				castleRights[WKS_CASTLE_RIGHTS] = False
 			#}
-			if castleRights[WQS_CASTLE_RIGHTS] : #{
-
-				if (pieceArray[WR] & SQUARE_BBS[A1]) == 0: #{
-
-					castleRights[WQS_CASTLE_RIGHTS] = False
-				#}
+			if castleRights[WQS_CASTLE_RIGHTS] and (pieceArray[WR] & SQUARE_BBS[A1]) == 0: #{
+				castleRights[WQS_CASTLE_RIGHTS] = False
 			#}
 		#} 
 		elif piece == BR: #{
 
-			if castleRights[BKS_CASTLE_RIGHTS] : #{
-
-				if (pieceArray[BR] & SQUARE_BBS[H8]) == 0: #{
-
-					castleRights[BKS_CASTLE_RIGHTS] = False
-				#}
+			if castleRights[BKS_CASTLE_RIGHTS] and (pieceArray[BR] & SQUARE_BBS[H8]) == 0: #{
+				castleRights[BKS_CASTLE_RIGHTS] = False
 			#}
-			if castleRights[BQS_CASTLE_RIGHTS] : #{
-
-				if (pieceArray[BR] & SQUARE_BBS[A8]) == 0: #{
-
-					castleRights[BQS_CASTLE_RIGHTS] = False
+			if castleRights[BQS_CASTLE_RIGHTS] and  (pieceArray[BR] & SQUARE_BBS[A8]) == 0: #{
+				castleRights[BQS_CASTLE_RIGHTS] = False
 				#}
 			#}
 		#}
 
 		priorNodes = nodes
-		nodes += PerftInline(depth-1, ply+1)
+		nodes += PerftInline(depth-1, ply+1, whiteToPlay, ep)
 
 		whiteToPlay = not whiteToPlay
 		if tag == 0 or tag == 26: #none or check
@@ -2973,7 +2961,7 @@ def RunPerftInline(depth: int): #{
 
 	timestamp_start = current_milli_time();
 
-	nodes: int = PerftInline(depth, 0)
+	nodes: int = PerftInline(depth, 0,ep = NO_SQUARE, whiteToPlay = True)
 
 	timestamp_end = current_milli_time();
 	elapsed = timestamp_end - timestamp_start
@@ -2987,5 +2975,8 @@ SetStartingPosition();
 PrintBoard();
 # import cProfile
 # cProfile.run("RunPerftInline(5)")
+import gc
+gc.disable()
 RunPerftInline(6);
+gc.enable()
 input();
