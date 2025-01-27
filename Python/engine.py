@@ -1,4 +1,3 @@
-
 import time
 
 WP = 0
@@ -1138,18 +1137,12 @@ def getRookMovesSeparate(square: int, combined_occ:int) -> int: #{
 	rookAndOccs = rookAttackUp & combined_occ;
 	if (rookAndOccs != 0): #{
 
-		lastValue = rookAndOccs;
-		for _ in range(0, 8): #{
+		lastValue = rookAndOccs
+		rookAndOccs &= rookAndOccs - 1  # Clear the lowest set bit
+		if rookAndOccs == 0:
+			endSquare = BitscanForward(lastValue)
+			combinedAttacks |= INBETWEEN_BITBOARDS[square][endSquare]
 
-			rookAndOccs = rookAndOccs & rookAndOccs - 1;
-			if (rookAndOccs == 0): #{
-
-				endSquare:int = BitscanForward(lastValue);
-				combinedAttacks |= INBETWEEN_BITBOARDS[square][endSquare];	
-				break;
-            #}
-			lastValue = rookAndOccs;
-        #}
     #} 
 	else: #{
         
@@ -1160,17 +1153,12 @@ def getRookMovesSeparate(square: int, combined_occ:int) -> int: #{
 	rookAndOccs = rookAttackLeft & combined_occ;
 	if (rookAndOccs != 0): #{
 
-		lastValue = rookAndOccs;
-		for _ in range(0, 8): #{
-			rookAndOccs = rookAndOccs & rookAndOccs - 1;
-			if (rookAndOccs == 0): #{
+		lastValue = rookAndOccs
+		rookAndOccs &= rookAndOccs - 1  # Clear the least significant set bit
+		if rookAndOccs == 0:
+			endSquare = BitscanForward(lastValue)
+			combinedAttacks |= INBETWEEN_BITBOARDS[square][endSquare]
 
-				endSquare:int = BitscanForward(lastValue);
-				combinedAttacks |= INBETWEEN_BITBOARDS[square][endSquare];
-				break;
-            #}
-			lastValue = rookAndOccs;
-    	#}
     #} 
 	else: #{
 
@@ -1212,16 +1200,12 @@ def getBishopMovesSeparate(square, combined_occ): #{
 	bishopAttackUpLeft = BISHOP_ATTACKS[BISHOP_UP_LEFT][square];
 	bishopAndOccs = bishopAttackUpLeft & combined_occ;
 	if (bishopAndOccs != 0): #{
-		lastValue = bishopAndOccs;
-		for _ in range(0, 8): #{
-			bishopAndOccs &= bishopAndOccs - 1;
-			if (bishopAndOccs == 0): #{
-				endSquare = BitscanForward(lastValue);
-				combinedAttacks |= INBETWEEN_BITBOARDS[square][endSquare];
-				break;
-			#}
-			lastValue = bishopAndOccs;
-		#}
+		lastValue = bishopAndOccs
+		bishopAndOccs &= bishopAndOccs - 1  # Clear the least significant set bit
+		if bishopAndOccs == 0:
+			endSquare = BitscanForward(lastValue)
+			combinedAttacks |= INBETWEEN_BITBOARDS[square][endSquare]
+
 	#}
 	else: #{
 
@@ -1232,16 +1216,11 @@ def getBishopMovesSeparate(square, combined_occ): #{
 	bishopAttackUpRight = BISHOP_ATTACKS[BISHOP_UP_RIGHT][square];
 	bishopAndOccs = bishopAttackUpRight & combined_occ;
 	if (bishopAndOccs != 0): #{
-		lastValue = bishopAndOccs;
-		for _ in range(0, 8): #{
-			bishopAndOccs &= bishopAndOccs - 1;
-			if (bishopAndOccs == 0): #{
-				endSquare:int = BitscanForward(lastValue);
-				combinedAttacks |= INBETWEEN_BITBOARDS[square][endSquare];
-				break;
-            #}
-			lastValue = bishopAndOccs;
-        #}
+		lastValue = bishopAndOccs
+		bishopAndOccs &= bishopAndOccs - 1  # Clear the least significant set bit
+		if bishopAndOccs == 0:
+			endSquare = BitscanForward(lastValue)
+			combinedAttacks |= INBETWEEN_BITBOARDS[square][endSquare]
     #}
 	else: #{
 		combinedAttacks |= bishopAttackUpRight;
@@ -1297,49 +1276,40 @@ def Is_Square_Attacked_By_White(square: int, occupancy: int) -> bool:
         (pieceArray[WQ] & rook_attacks) != 0
     )
 
-
-
-def BitscanForward(bb):
+def BitscanForward(bb: int):
     return (bb & -bb).bit_length() - 1 if bb != 0 else -1
 
 
 def SetStartingPosition(): #{
-    ep = NO_SQUARE;
-    whiteToPlay = True;
-    castleRights[0] = True;
-    castleRights[1] = True;
-    castleRights[2] = True;
-    castleRights[3] = True;
-    pieceArray[WP] = WP_STARTING_POSITIONS
-    pieceArray[WN] = WN_STARTING_POSITIONS
-    pieceArray[WB] = WB_STARTING_POSITIONS
-    pieceArray[WR] = WR_STARTING_POSITIONS
-    pieceArray[WQ] = WQ_STARTING_POSITION
-    pieceArray[WK] = WK_STARTING_POSITION
-    pieceArray[BP] = BP_STARTING_POSITIONS
-    pieceArray[BN] = BN_STARTING_POSITIONS
-    pieceArray[BB] = BB_STARTING_POSITIONS
-    pieceArray[BR] = BR_STARTING_POSITIONS
-    pieceArray[BQ] = BQ_STARTING_POSITION
-    pieceArray[BK] = BK_STARTING_POSITION
-#}
+	global ep
+	global whiteToPlay
 
-def IsOccupied(bitboard: int, square: int) -> bool:
-#{
-    return (bitboard & SQUARE_BBS[square]) != 0
+	ep = NO_SQUARE;
+	whiteToPlay = True;
+	castleRights[0] = True;
+	castleRights[1] = True;
+	castleRights[2] = True;
+	castleRights[3] = True;
+	pieceArray[WP] = WP_STARTING_POSITIONS
+	pieceArray[WN] = WN_STARTING_POSITIONS
+	pieceArray[WB] = WB_STARTING_POSITIONS
+	pieceArray[WR] = WR_STARTING_POSITIONS
+	pieceArray[WQ] = WQ_STARTING_POSITION
+	pieceArray[WK] = WK_STARTING_POSITION
+	pieceArray[BP] = BP_STARTING_POSITIONS
+	pieceArray[BN] = BN_STARTING_POSITIONS
+	pieceArray[BB] = BB_STARTING_POSITIONS
+	pieceArray[BR] = BR_STARTING_POSITIONS
+	pieceArray[BQ] = BQ_STARTING_POSITION
+	pieceArray[BK] = BK_STARTING_POSITION
 #}
 
 def GetOccupiedIndex(square: int) -> int:
-#{
-	for i in range(0, 12):
-    #{
-		if IsOccupied(pieceArray[i], square):
-        #{
-			return i;
-		#}
-	#}
-	return EMPTY;
-#}
+    for i in range(0, 12):
+        if (pieceArray[i] & SQUARE_BBS[square]) != 0:
+            return i
+    return EMPTY
+
 
 def PrintBoard():
 
@@ -1556,29 +1526,17 @@ def PerftInline(depth: int, ply: int) -> int:
 				targetSquare = BitscanForward(tempEmpty)
 				tempEmpty &= tempEmpty - 1
 
-				if (piece_array_local[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0: #{
+				if (
+					(piece_array_local[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 or
+					(piece_array_local[BN] & KNIGHT_ATTACKS[targetSquare]) != 0 or
+					(piece_array_local[BK] & KING_ATTACKS[targetSquare]) != 0 or
+					(piece_array_local[BB] & getBishopMovesSeparate(targetSquare, occupanciesWithoutWhiteKing)) != 0 or
+					(piece_array_local[BQ] & getBishopMovesSeparate(targetSquare, occupanciesWithoutWhiteKing)) != 0 or
+					(piece_array_local[BR] & getRookMovesSeparate(targetSquare, occupanciesWithoutWhiteKing)) != 0 or
+					(piece_array_local[BQ] & getRookMovesSeparate(targetSquare, occupanciesWithoutWhiteKing)) != 0
+				):
 					continue
-				#}
-				if (piece_array_local[BN] & KNIGHT_ATTACKS[targetSquare]) != 0: #{
-					continue
-				#}
-				if (piece_array_local[BK] & KING_ATTACKS[targetSquare]) != 0: #{
-					continue
-				#}
-				bishopAttacks: int = getBishopMovesSeparate(targetSquare, occupanciesWithoutWhiteKing)
-				if (piece_array_local[BB] & bishopAttacks) != 0: #{
-					continue
-				#}
-				if (piece_array_local[BQ] & bishopAttacks) != 0: #{
-					continue
-				#}
-				rookAttacks: int = getRookMovesSeparate(targetSquare, occupanciesWithoutWhiteKing)
-				if (piece_array_local[BR] & rookAttacks) != 0: #{
-					continue
-				#}
-				if (piece_array_local[BQ] & rookAttacks) != 0: #{
-					continue
-				#}
+
 
 				moveList[moveCount][MOVE_STARTING] = whiteKingPosition;
 				moveList[moveCount][MOVE_TARGET] = targetSquare;
@@ -1593,29 +1551,14 @@ def PerftInline(depth: int, ply: int) -> int:
 				targetSquare = BitscanForward(tempCaptures);
 				tempCaptures &= tempCaptures - 1;
 
-				if (piece_array_local[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0: #{
+				if (piece_array_local[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 or \
+				(piece_array_local[BN] & KNIGHT_ATTACKS[targetSquare]) != 0 or \
+				(piece_array_local[BK] & KING_ATTACKS[targetSquare]) != 0 or \
+				(piece_array_local[BB] & getBishopMovesSeparate(targetSquare, occupanciesWithoutWhiteKing)) != 0 or \
+				(piece_array_local[BQ] & getBishopMovesSeparate(targetSquare, occupanciesWithoutWhiteKing)) != 0 or \
+				(piece_array_local[BR] & getRookMovesSeparate(targetSquare, occupanciesWithoutWhiteKing)) != 0 or \
+				(piece_array_local[BQ] & getRookMovesSeparate(targetSquare, occupanciesWithoutWhiteKing)) != 0:
 					continue
-				#}
-				if (piece_array_local[BN] & KNIGHT_ATTACKS[targetSquare]) != 0: #{
-					continue
-				#}
-				if (piece_array_local[BK] & KING_ATTACKS[targetSquare]) != 0: #{
-					continue
-				#}
-				bishopAttacks: int = getBishopMovesSeparate(targetSquare, occupanciesWithoutWhiteKing)
-				if (piece_array_local[BB] & bishopAttacks) != 0: #{
-					continue
-				#}
-				if (piece_array_local[BQ] & bishopAttacks) != 0: #{
-					continue
-				#}
-				rookAttacks: int = getRookMovesSeparate(targetSquare, occupanciesWithoutWhiteKing)
-				if (piece_array_local[BR] & rookAttacks) != 0: #{
-					continue
-				#}
-				if (piece_array_local[BQ] & rookAttacks) != 0: #{
-					continue
-				#}
 
 				moveList[moveCount][MOVE_STARTING] = whiteKingPosition;
 				moveList[moveCount][MOVE_TARGET] = targetSquare;
@@ -1710,16 +1653,12 @@ def PerftInline(depth: int, ply: int) -> int:
 				tempBitboard &= tempBitboard - 1; #removes the knight from that square to not infinitely loop
 
 				tempPinBitboard = MAX_ULONG;
-				if pinNumber != 0: #{
-
-					for i in range(0, pinNumber): #{
-
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare: #{
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						#}
-					#}
-				#}
+				if pinNumber != 0:
+					# Find the pin that matches the starting square
+					pin = next((pin for pin in pinArray[:pinNumber] if pin[PINNED_SQUARE_INDEX] == startingSquare), None)
+					
+					if pin:
+						tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][pin[PINNING_PIECE_INDEX]]
 
 				tempAttack = ((KNIGHT_ATTACKS[startingSquare] & BLACK_OCCUPANCIES) & checkBitboard) & tempPinBitboard #gets knight captures
 				while tempAttack != 0: #{
@@ -1757,14 +1696,12 @@ def PerftInline(depth: int, ply: int) -> int:
 				tempBitboard &= tempBitboard - 1;
 
 				tempPinBitboard = MAX_ULONG;
-				if pinNumber != 0: #{
-					for i in range(0, pinNumber): #{
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare: #{
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][pinArray[i][PINNING_PIECE_INDEX]];
-						#}
-					#}
-				#}
+				if pinNumber != 0:
+					# Find the pin that matches the starting square
+					pin = next((pin for pin in pinArray[:pinNumber] if pin[PINNED_SQUARE_INDEX] == startingSquare), None)
+					
+					if pin:
+						tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][pin[PINNING_PIECE_INDEX]]
 
 				if (SQUARE_BBS[startingSquare-8] & COMBINED_OCCUPANCIES) == 0: #{ #if up one square is empty
 
@@ -1776,25 +1713,22 @@ def PerftInline(depth: int, ply: int) -> int:
 							moveList[moveCount][MOVE_TARGET] = startingSquare - 8
 							moveList[moveCount][MOVE_TAG] = TAG_WQueenPromotion
 							moveList[moveCount][MOVE_PIECE] = WP
-							moveCount+=1;
 
 							moveList[moveCount][MOVE_STARTING] = startingSquare
 							moveList[moveCount][MOVE_TARGET] = startingSquare - 8
 							moveList[moveCount][MOVE_TAG] = TAG_WRookPromotion
 							moveList[moveCount][MOVE_PIECE] = WP
-							moveCount+=1;
 
 							moveList[moveCount][MOVE_STARTING] = startingSquare
 							moveList[moveCount][MOVE_TARGET] = startingSquare - 8
 							moveList[moveCount][MOVE_TAG] = TAG_WBishopPromotion
 							moveList[moveCount][MOVE_PIECE] = WP
-							moveCount+=1;
 
 							moveList[moveCount][MOVE_STARTING] = startingSquare
 							moveList[moveCount][MOVE_TARGET] = startingSquare - 8
 							moveList[moveCount][MOVE_TAG] = TAG_WKnightPromotion
 							moveList[moveCount][MOVE_PIECE] = WP
-							moveCount+=1;
+							moveCount+=4;
 
 						#} 
 						else: #{
@@ -1836,25 +1770,22 @@ def PerftInline(depth: int, ply: int) -> int:
 						moveList[moveCount][MOVE_TARGET] = targetSquare
 						moveList[moveCount][MOVE_TAG] = TAG_WCaptureQueenPromotion
 						moveList[moveCount][MOVE_PIECE] = WP
-						moveCount+=1;
 
 						moveList[moveCount][MOVE_STARTING] = startingSquare
 						moveList[moveCount][MOVE_TARGET] = targetSquare
 						moveList[moveCount][MOVE_TAG] = TAG_WCaptureRookPromotion
 						moveList[moveCount][MOVE_PIECE] = WP
-						moveCount+=1;
 
 						moveList[moveCount][MOVE_STARTING] = startingSquare
 						moveList[moveCount][MOVE_TARGET] = targetSquare
 						moveList[moveCount][MOVE_TAG] = TAG_WCaptureBishopPromotion
 						moveList[moveCount][MOVE_PIECE] = WP
-						moveCount+=1;
 
 						moveList[moveCount][MOVE_STARTING] = startingSquare
 						moveList[moveCount][MOVE_TARGET] = targetSquare
 						moveList[moveCount][MOVE_TAG] = TAG_WCaptureKnightPromotion
 						moveList[moveCount][MOVE_PIECE] = WP
-						moveCount+=1;
+						moveCount+=4;
 					#} 
 					else: #{
 
@@ -1919,16 +1850,12 @@ def PerftInline(depth: int, ply: int) -> int:
 				tempBitboard &= tempBitboard - 1
 
 				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0: #{
-
-					for i in range(0, pinNumber): #{
-
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare: #{
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						#}
-					#}
-				#}
+				if pinNumber != 0:
+					# Find the pin that matches the starting square
+					pin = next((pin for pin in pinArray[:pinNumber] if pin[PINNED_SQUARE_INDEX] == startingSquare), None)
+					
+					if pin:
+						tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][pin[PINNING_PIECE_INDEX]]
 
 				rookAttacks = getRookMovesSeparate(startingSquare, COMBINED_OCCUPANCIES);
 
@@ -1966,16 +1893,12 @@ def PerftInline(depth: int, ply: int) -> int:
 				tempBitboard &= tempBitboard - 1
 
 				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0: #{
-
-					for i in range(0, pinNumber): #{
-
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare: #{
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						#}
-					#}
-				#}
+				if pinNumber != 0:
+					# Find the pin that matches the starting square
+					pin = next((pin for pin in pinArray[:pinNumber] if pin[PINNED_SQUARE_INDEX] == startingSquare), None)
+					
+					if pin:
+						tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][pin[PINNING_PIECE_INDEX]]
 
 				bishopAttacks = getBishopMovesSeparate(startingSquare, COMBINED_OCCUPANCIES);
 
@@ -2013,19 +1936,14 @@ def PerftInline(depth: int, ply: int) -> int:
 				tempBitboard &= tempBitboard - 1
 
 				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0: #{
+				if pinNumber != 0:
+					# Find the pin that matches the starting square
+					pin = next((pin for pin in pinArray[:pinNumber] if pin[PINNED_SQUARE_INDEX] == startingSquare), None)
+					
+					if pin:
+						tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][pin[PINNING_PIECE_INDEX]]
 
-					for i in range(0, pinNumber): #{
-
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare: #{
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][pinArray[i][PINNING_PIECE_INDEX]];
-						#}
-					#}
-				#}
-
-				queenAttacks = getRookMovesSeparate(startingSquare, COMBINED_OCCUPANCIES);
-				queenAttacks |= getBishopMovesSeparate(startingSquare, COMBINED_OCCUPANCIES);
+				queenAttacks = getRookMovesSeparate(startingSquare, COMBINED_OCCUPANCIES) | getBishopMovesSeparate(startingSquare, COMBINED_OCCUPANCIES)
 
 				tempAttack = ((queenAttacks & BLACK_OCCUPANCIES) & checkBitboard) & tempPinBitboard
 
@@ -2199,29 +2117,15 @@ def PerftInline(depth: int, ply: int) -> int:
 				targetSquare = BitscanForward(tempAttack);
 				tempAttack &= tempAttack - 1;
 
-				if (piece_array_local[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0: #{
+				if (piece_array_local[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 or \
+				(piece_array_local[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 or \
+				(piece_array_local[WK] & KING_ATTACKS[targetSquare]) != 0 or \
+				(piece_array_local[WB] & getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
+				(piece_array_local[WQ] & getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
+				(piece_array_local[WR] & getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
+				(piece_array_local[WQ] & getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0:
 					continue
-				#}
-				if (piece_array_local[WN] & KNIGHT_ATTACKS[targetSquare]) != 0: #{
-					continue
-				#}
-				if (piece_array_local[WK] & KING_ATTACKS[targetSquare]) != 0: #{
-					continue
-				#}
-				bishopAttacks:int = getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing);
-				if (piece_array_local[WB] & bishopAttacks) != 0: #{
-					continue
-				#}
-				if (piece_array_local[WQ] & bishopAttacks) != 0: #{
-					continue
-				#}
-				rookAttacks = getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing);
-				if (piece_array_local[WR] & rookAttacks) != 0: #{
-					continue
-				#}
-				if (piece_array_local[WQ] & rookAttacks) != 0: #{
-					continue
-				#}
+
 
 				moveList[moveCount][MOVE_STARTING] = startingSquare
 				moveList[moveCount][MOVE_TARGET] = targetSquare
@@ -2236,29 +2140,15 @@ def PerftInline(depth: int, ply: int) -> int:
 				targetSquare = BitscanForward(tempAttack);
 				tempAttack &= tempAttack - 1;
 
-				if (piece_array_local[WP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0: #{
+				if (piece_array_local[WP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 or \
+				(piece_array_local[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 or \
+				(piece_array_local[WK] & KING_ATTACKS[targetSquare]) != 0 or \
+				(piece_array_local[WB] & getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
+				(piece_array_local[WQ] & getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
+				(piece_array_local[WR] & getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
+				(piece_array_local[WQ] & getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0:
 					continue
-				#}
-				if (piece_array_local[WN] & KNIGHT_ATTACKS[targetSquare]) != 0: #{
-					continue
-				#}
-				if (piece_array_local[WK] & KING_ATTACKS[targetSquare]) != 0: #{
-					continue
-				#}
-				bishopAttacks:int = getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)
-				if (piece_array_local[WB] & bishopAttacks) != 0: #{
-					continue
-				#}
-				if (piece_array_local[WQ] & bishopAttacks) != 0: #{
-					continue
-				#}
-				rookAttacks:int = getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing);
-				if (piece_array_local[WR] & rookAttacks) != 0: #{
-					continue
-				#}
-				if (piece_array_local[WQ] & rookAttacks) != 0: #{
-					continue
-				#}
+
 
 				moveList[moveCount][MOVE_STARTING] = startingSquare
 				moveList[moveCount][MOVE_TARGET] = targetSquare
@@ -2279,14 +2169,13 @@ def PerftInline(depth: int, ply: int) -> int:
 				tempBitboard &= tempBitboard - 1
 
 				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0: #{
-					for i in range(0, pinNumber): #{
+				if pinNumber != 0:
+					# Find the pin that matches the starting square
+					pin = next((pin for pin in pinArray[:pinNumber] if pin[PINNED_SQUARE_INDEX] == startingSquare), None)
+					
+					if pin:
+						tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][pin[PINNING_PIECE_INDEX]]
 
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare: #{
-							tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						#}
-					#}
-				#}
 
 				if (SQUARE_BBS[startingSquare+8] & COMBINED_OCCUPANCIES) == 0: #{ #if up one square is empty
 
@@ -2298,25 +2187,22 @@ def PerftInline(depth: int, ply: int) -> int:
 							moveList[moveCount][MOVE_TARGET] = startingSquare + 8
 							moveList[moveCount][MOVE_TAG] = TAG_BBishopPromotion
 							moveList[moveCount][MOVE_PIECE] = BP
-							moveCount+=1;
 
 							moveList[moveCount][MOVE_STARTING] = startingSquare
 							moveList[moveCount][MOVE_TARGET] = startingSquare + 8
 							moveList[moveCount][MOVE_TAG] = TAG_BKnightPromotion
 							moveList[moveCount][MOVE_PIECE] = BP
-							moveCount+=1;
 
 							moveList[moveCount][MOVE_STARTING] = startingSquare
 							moveList[moveCount][MOVE_TARGET] = startingSquare + 8
 							moveList[moveCount][MOVE_TAG] = TAG_BRookPromotion
 							moveList[moveCount][MOVE_PIECE] = BP
-							moveCount+=1;
 
 							moveList[moveCount][MOVE_STARTING] = startingSquare
 							moveList[moveCount][MOVE_TARGET] = startingSquare + 8
 							moveList[moveCount][MOVE_TAG] = TAG_BQueenPromotion
 							moveList[moveCount][MOVE_PIECE] = BP
-							moveCount+=1;
+							moveCount+=4;
 						#} 
 						else: #{
 
@@ -2357,25 +2243,22 @@ def PerftInline(depth: int, ply: int) -> int:
 						moveList[moveCount][MOVE_TARGET] = targetSquare
 						moveList[moveCount][MOVE_TAG] = TAG_BCaptureQueenPromotion
 						moveList[moveCount][MOVE_PIECE] = BP
-						moveCount+=1
 
 						moveList[moveCount][MOVE_STARTING] = startingSquare
 						moveList[moveCount][MOVE_TARGET] = targetSquare
 						moveList[moveCount][MOVE_TAG] = TAG_BCaptureRookPromotion
 						moveList[moveCount][MOVE_PIECE] = BP
-						moveCount+=1
 
 						moveList[moveCount][MOVE_STARTING] = startingSquare
 						moveList[moveCount][MOVE_TARGET] = targetSquare
 						moveList[moveCount][MOVE_TAG] = TAG_BCaptureKnightPromotion
 						moveList[moveCount][MOVE_PIECE] = BP
-						moveCount+=1
 
 						moveList[moveCount][MOVE_STARTING] = startingSquare
 						moveList[moveCount][MOVE_TARGET] = targetSquare
 						moveList[moveCount][MOVE_TAG] = TAG_BCaptureBishopPromotion
 						moveList[moveCount][MOVE_PIECE] = BP
-						moveCount+=1
+						moveCount+=4
 					#} 
 					else: #{
 
@@ -2440,16 +2323,13 @@ def PerftInline(depth: int, ply: int) -> int:
 				tempBitboard &= tempBitboard - 1                                         #removes the knight from that square to not infinitely loop
 
 				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0: #{
+				if pinNumber != 0:
+					# Find the pin that matches the starting square
+					pin = next((pin for pin in pinArray[:pinNumber] if pin[PINNED_SQUARE_INDEX] == startingSquare), None)
+					
+					if pin:
+						tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][pin[PINNING_PIECE_INDEX]]
 
-					for i in range(0,pinNumber): #{
-
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare: #{
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						#}
-					#}
-				#}
 
 				tempAttack = ((KNIGHT_ATTACKS[startingSquare] & WHITE_OCCUPANCIES) & checkBitboard) & tempPinBitboard #gets knight captures
 				while tempAttack != 0: #{
@@ -2486,15 +2366,12 @@ def PerftInline(depth: int, ply: int) -> int:
 				tempBitboard &= tempBitboard - 1
 
 				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0: #{
-					for i in range(0, pinNumber): #{
-
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare: #{
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						#}
-					#}
-				#}
+				if pinNumber != 0:
+					# Find the pin that matches the starting square
+					pin = next((pin for pin in pinArray[:pinNumber] if pin[PINNED_SQUARE_INDEX] == startingSquare), None)
+					
+					if pin:
+						tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][pin[PINNING_PIECE_INDEX]]
 
 				bishopAttacks = getBishopMovesSeparate(startingSquare, COMBINED_OCCUPANCIES)
 
@@ -2532,16 +2409,12 @@ def PerftInline(depth: int, ply: int) -> int:
 				tempBitboard &= tempBitboard - 1
 
 				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0: #{
-
-					for i in range(0, pinNumber): #{
-
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare: #{
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						#}
-					#}
-				#}
+				if pinNumber != 0:
+					# Find the pin that matches the starting square
+					pin = next((pin for pin in pinArray[:pinNumber] if pin[PINNED_SQUARE_INDEX] == startingSquare), None)
+					
+					if pin:
+						tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][pin[PINNING_PIECE_INDEX]]
 
 				rookAttacks = getRookMovesSeparate(startingSquare, COMBINED_OCCUPANCIES)
 
@@ -2579,19 +2452,15 @@ def PerftInline(depth: int, ply: int) -> int:
 				tempBitboard &= tempBitboard - 1
 
 				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0: #{
+				if pinNumber != 0:
+					# Find the pin that matches the starting square
+					pin = next((pin for pin in pinArray[:pinNumber] if pin[PINNED_SQUARE_INDEX] == startingSquare), None)
+					
+					if pin:
+						tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][pin[PINNING_PIECE_INDEX]]
 
-					for i in range(0, pinNumber): #{
+				queenAttacks = getRookMovesSeparate(startingSquare, COMBINED_OCCUPANCIES) | getBishopMovesSeparate(startingSquare, COMBINED_OCCUPANCIES)
 
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare: #{
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						#}
-					#}
-				#}
-
-				queenAttacks = getRookMovesSeparate(startingSquare, COMBINED_OCCUPANCIES)
-				queenAttacks |= getBishopMovesSeparate(startingSquare, COMBINED_OCCUPANCIES)
 
 				tempAttack = ((queenAttacks & WHITE_OCCUPANCIES) & checkBitboard) & tempPinBitboard
 
@@ -2628,30 +2497,15 @@ def PerftInline(depth: int, ply: int) -> int:
 				targetSquare = BitscanForward(tempAttack);
 				tempAttack &= tempAttack - 1
 
-				if (piece_array_local[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0: #{
-					continue
-				#}
-				if (piece_array_local[WN] & KNIGHT_ATTACKS[targetSquare]) != 0: #{
-					continue
-				#}
-				if (piece_array_local[WK] & KING_ATTACKS[targetSquare]) != 0: #{
-					continue
-				#}
 				occupancyWithoutBlackKing = COMBINED_OCCUPANCIES & (~piece_array_local[BK])
-				bishopAttacks = getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)
-				if (piece_array_local[WB] & bishopAttacks) != 0: #{
+				if (piece_array_local[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 or \
+				(piece_array_local[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 or \
+				(piece_array_local[WK] & KING_ATTACKS[targetSquare]) != 0 or \
+				(piece_array_local[WB] & getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
+				(piece_array_local[WQ] & getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
+				(piece_array_local[WR] & getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
+				(piece_array_local[WQ] & getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0:
 					continue
-				#}
-				if (piece_array_local[WQ] & bishopAttacks) != 0: #{
-					continue
-				#}
-				rookAttacks = getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)
-				if (piece_array_local[WR] & rookAttacks) != 0: #{
-					continue
-				#}
-				if (piece_array_local[WQ] & rookAttacks) != 0: #{
-					continue
-				#}
 
 				moveList[moveCount][MOVE_STARTING] = blackKingPosition
 				moveList[moveCount][MOVE_TARGET] = targetSquare
@@ -2667,30 +2521,16 @@ def PerftInline(depth: int, ply: int) -> int:
 				targetSquare = BitscanForward(tempAttack);
 				tempAttack &= tempAttack - 1
 
-				if (piece_array_local[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0: #{
-					continue
-				#}
-				if (piece_array_local[WN] & KNIGHT_ATTACKS[targetSquare]) != 0: #{
-					continue
-				#}
-				if (piece_array_local[WK] & KING_ATTACKS[targetSquare]) != 0: #{
-					continue
-				#}
 				occupancyWithoutBlackKing: int = COMBINED_OCCUPANCIES & (~piece_array_local[BK])
-				bishopAttacks = getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)
-				if (piece_array_local[WB] & bishopAttacks) != 0: #{
+				if (piece_array_local[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 or \
+				(piece_array_local[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 or \
+				(piece_array_local[WK] & KING_ATTACKS[targetSquare]) != 0 or \
+				(piece_array_local[WB] & getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
+				(piece_array_local[WQ] & getBishopMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
+				(piece_array_local[WR] & getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0 or \
+				(piece_array_local[WQ] & getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)) != 0:
 					continue
-				#}
-				if (piece_array_local[WQ] & bishopAttacks) != 0: #{
-					continue
-				#}
-				rookAttacks = getRookMovesSeparate(targetSquare, occupancyWithoutBlackKing)
-				if (piece_array_local[WR] & rookAttacks) != 0: #{
-					continue
-				#}
-				if (piece_array_local[WQ] & rookAttacks) != 0: #{
-					continue
-				#}
+
 
 				moveList[moveCount][MOVE_STARTING] = blackKingPosition
 				moveList[moveCount][MOVE_TARGET] = targetSquare
@@ -2759,33 +2599,69 @@ def PerftInline(depth: int, ply: int) -> int:
 			pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
 
 		elif tag == 2:  # white ep
-			pieceArray[WP], pieceArray[BP], ep = pieceArray[WP] | SQUARE_BBS[targetSquare], pieceArray[BP] & ~SQUARE_BBS[targetSquare+8], NO_SQUARE
+			pieceArray[WP] = pieceArray[WP] | SQUARE_BBS[targetSquare]
+			pieceArray[BP] = pieceArray[BP] & ~SQUARE_BBS[targetSquare + 8]
+			ep = NO_SQUARE
 		elif tag == 3:  # black ep
-			pieceArray[BP], pieceArray[WP], ep = pieceArray[BP] | SQUARE_BBS[targetSquare], pieceArray[WP] & ~SQUARE_BBS[targetSquare-8], NO_SQUARE
+			pieceArray[BP] = pieceArray[BP] | SQUARE_BBS[targetSquare]
+			pieceArray[WP] = pieceArray[WP] & ~SQUARE_BBS[targetSquare - 8]
+			ep = NO_SQUARE
 		elif tag == 4:  # WKS
-			pieceArray[WK], pieceArray[WR], castleRights[WKS_CASTLE_RIGHTS], castleRights[WQS_CASTLE_RIGHTS], ep = (pieceArray[WK] | SQUARE_BBS[G1]) & ~SQUARE_BBS[E1], (pieceArray[WR] | SQUARE_BBS[F1]) & ~SQUARE_BBS[H1], False, False, NO_SQUARE
+			pieceArray[WK] = (pieceArray[WK] | SQUARE_BBS[G1]) & ~SQUARE_BBS[E1]
+			pieceArray[WR] = (pieceArray[WR] | SQUARE_BBS[F1]) & ~SQUARE_BBS[H1]
+			castleRights[WKS_CASTLE_RIGHTS] = False
+			castleRights[WQS_CASTLE_RIGHTS] = False
+			ep = NO_SQUARE
 		elif tag == 5:  # WQS
-			pieceArray[WK], pieceArray[WR], castleRights[WKS_CASTLE_RIGHTS], castleRights[WQS_CASTLE_RIGHTS], ep = (pieceArray[WK] | SQUARE_BBS[C1]) & ~SQUARE_BBS[E1], (pieceArray[WR] | SQUARE_BBS[D1]) & ~SQUARE_BBS[A1], False, False, NO_SQUARE
+			pieceArray[WK] = (pieceArray[WK] | SQUARE_BBS[C1]) & ~SQUARE_BBS[E1]
+			pieceArray[WR] = (pieceArray[WR] | SQUARE_BBS[D1]) & ~SQUARE_BBS[A1]
+			castleRights[WKS_CASTLE_RIGHTS] = False
+			castleRights[WQS_CASTLE_RIGHTS] = False
+			ep = NO_SQUARE
 		elif tag == 6:  # BKS
-			pieceArray[BK], pieceArray[BR], castleRights[BKS_CASTLE_RIGHTS], castleRights[BQS_CASTLE_RIGHTS], ep = (pieceArray[BK] | SQUARE_BBS[G8]) & ~SQUARE_BBS[E8], (pieceArray[BR] | SQUARE_BBS[F8]) & ~SQUARE_BBS[H8], False, False, NO_SQUARE
+			pieceArray[BK] = (pieceArray[BK] | SQUARE_BBS[G8]) & ~SQUARE_BBS[E8]
+			pieceArray[BR] = (pieceArray[BR] | SQUARE_BBS[F8]) & ~SQUARE_BBS[H8]
+			castleRights[BKS_CASTLE_RIGHTS] = False
+			castleRights[BQS_CASTLE_RIGHTS] = False
+			ep = NO_SQUARE
 		elif tag == 7:  # BQS
-			pieceArray[BK], pieceArray[BR], castleRights[BKS_CASTLE_RIGHTS], castleRights[BQS_CASTLE_RIGHTS], ep = (pieceArray[BK] | SQUARE_BBS[C8]) & ~SQUARE_BBS[E8], (pieceArray[BR] | SQUARE_BBS[D8]) & ~SQUARE_BBS[A8], False, False, NO_SQUARE
+			pieceArray[BK] = (pieceArray[BK] | SQUARE_BBS[C8]) & ~SQUARE_BBS[E8]
+			pieceArray[BR] = (pieceArray[BR] | SQUARE_BBS[D8]) & ~SQUARE_BBS[A8]
+			castleRights[BKS_CASTLE_RIGHTS] = False
+			castleRights[BQS_CASTLE_RIGHTS] = False
+			ep = NO_SQUARE
 		elif tag == 8:  # BNPr
-			pieceArray[BN], pieceArray[piece], ep = pieceArray[BN] | SQUARE_BBS[targetSquare], pieceArray[piece] & ~SQUARE_BBS[startingSquare], NO_SQUARE
+			pieceArray[BN] = pieceArray[BN] | SQUARE_BBS[targetSquare]
+			pieceArray[piece] = pieceArray[piece] & ~SQUARE_BBS[startingSquare]
+			ep = NO_SQUARE
 		elif tag == 9:  # BBPr
-			pieceArray[BB], pieceArray[piece], ep = pieceArray[BB] | SQUARE_BBS[targetSquare], pieceArray[piece] & ~SQUARE_BBS[startingSquare], NO_SQUARE
+			pieceArray[BB] = pieceArray[BB] | SQUARE_BBS[targetSquare]
+			pieceArray[piece] = pieceArray[piece] & ~SQUARE_BBS[startingSquare]
+			ep = NO_SQUARE
 		elif tag == 10:  # BQPr
-			pieceArray[BQ], pieceArray[piece], ep = pieceArray[BQ] | SQUARE_BBS[targetSquare], pieceArray[piece] & ~SQUARE_BBS[startingSquare], NO_SQUARE
+			pieceArray[BQ] = pieceArray[BQ] | SQUARE_BBS[targetSquare]
+			pieceArray[piece] = pieceArray[piece] & ~SQUARE_BBS[startingSquare]
+			ep = NO_SQUARE
 		elif tag == 11:  # BRPr
-			pieceArray[BR], pieceArray[piece], ep = pieceArray[BR] | SQUARE_BBS[targetSquare], pieceArray[piece] & ~SQUARE_BBS[startingSquare], NO_SQUARE
+			pieceArray[BR] = pieceArray[BR] | SQUARE_BBS[targetSquare]
+			pieceArray[piece] = pieceArray[piece] & ~SQUARE_BBS[startingSquare]
+			ep = NO_SQUARE
 		elif tag == 12:  # WNPr
-			pieceArray[WN], pieceArray[piece], ep = pieceArray[WN] | SQUARE_BBS[targetSquare], pieceArray[piece] & ~SQUARE_BBS[startingSquare], NO_SQUARE
+			pieceArray[WN] = pieceArray[WN] | SQUARE_BBS[targetSquare]
+			pieceArray[piece] = pieceArray[piece] & ~SQUARE_BBS[startingSquare]
+			ep = NO_SQUARE
 		elif tag == 13:  # WBPr
-			pieceArray[WB], pieceArray[piece], ep = pieceArray[WB] | SQUARE_BBS[targetSquare], pieceArray[piece] & ~SQUARE_BBS[startingSquare], NO_SQUARE
+			pieceArray[WB] = pieceArray[WB] | SQUARE_BBS[targetSquare]
+			pieceArray[piece] = pieceArray[piece] & ~SQUARE_BBS[startingSquare]
+			ep = NO_SQUARE
 		elif tag == 14:  # WQPr
-			pieceArray[WQ], pieceArray[piece], ep = pieceArray[WQ] | SQUARE_BBS[targetSquare], pieceArray[piece] & ~SQUARE_BBS[startingSquare], NO_SQUARE
+			pieceArray[WQ] = pieceArray[WQ] | SQUARE_BBS[targetSquare]
+			pieceArray[piece] = pieceArray[piece] & ~SQUARE_BBS[startingSquare]
+			ep = NO_SQUARE
 		elif tag == 15:  # WRPr
-			pieceArray[WR], pieceArray[piece], ep = pieceArray[WR] | SQUARE_BBS[targetSquare], pieceArray[piece] & ~SQUARE_BBS[startingSquare], NO_SQUARE
+			pieceArray[WR] = pieceArray[WR] | SQUARE_BBS[targetSquare]
+			pieceArray[piece] = pieceArray[piece] & ~SQUARE_BBS[startingSquare]
+			ep = NO_SQUARE
 
 
 		elif tag == 16: #BNPrCAP
@@ -2902,13 +2778,13 @@ def PerftInline(depth: int, ply: int) -> int:
 			pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
 
 		elif tag == 24: #WDouble
-			pieceArray[WP] |= SQUARE_BBS[targetSquare]
-			pieceArray[WP] &= ~SQUARE_BBS[startingSquare]
+			pieceArray[WP] = (pieceArray[WP] | SQUARE_BBS[targetSquare]) & ~SQUARE_BBS[startingSquare]
+
 			ep = targetSquare + 8
 
 		elif tag == 25: #BDouble
-			pieceArray[BP] |= SQUARE_BBS[targetSquare]
-			pieceArray[BP] &= ~SQUARE_BBS[startingSquare]
+			pieceArray[BP] = (pieceArray[BP] | SQUARE_BBS[targetSquare]) & ~SQUARE_BBS[startingSquare]
+
 			ep = targetSquare - 8
 		#}
 
@@ -3003,43 +2879,70 @@ def PerftInline(depth: int, ply: int) -> int:
 			pieceArray[WR] = (pieceArray[WR] | SQUARE_BBS[H1]) & ~SQUARE_BBS[F1]
 
 		if tag == 5:  # WQS
-			pieceArray[WK], pieceArray[WR] = (pieceArray[WK] | SQUARE_BBS[E1]) & ~SQUARE_BBS[C1], (pieceArray[WR] | SQUARE_BBS[A1]) & ~SQUARE_BBS[D1]
+			pieceArray[WK] = (pieceArray[WK] | SQUARE_BBS[E1]) & ~SQUARE_BBS[C1]
+			pieceArray[WR] = (pieceArray[WR] | SQUARE_BBS[A1]) & ~SQUARE_BBS[D1]
 		elif tag == 6:  # BKS
-			pieceArray[BK], pieceArray[BR] = (pieceArray[BK] | SQUARE_BBS[E8]) & ~SQUARE_BBS[G8], (pieceArray[BR] | SQUARE_BBS[H8]) & ~SQUARE_BBS[F8]
+			pieceArray[BK] = (pieceArray[BK] | SQUARE_BBS[E8]) & ~SQUARE_BBS[G8]
+			pieceArray[BR] = (pieceArray[BR] | SQUARE_BBS[H8]) & ~SQUARE_BBS[F8]
 		elif tag == 7:  # BQS
-			pieceArray[BK], pieceArray[BR] = (pieceArray[BK] | SQUARE_BBS[E8]) & ~SQUARE_BBS[C8], (pieceArray[BR] | SQUARE_BBS[A8]) & ~SQUARE_BBS[D8]
+			pieceArray[BK] = (pieceArray[BK] | SQUARE_BBS[E8]) & ~SQUARE_BBS[C8]
+			pieceArray[BR] = (pieceArray[BR] | SQUARE_BBS[A8]) & ~SQUARE_BBS[D8]
 		elif tag == 8:  # BNPr
-			pieceArray[BP], pieceArray[BN] = pieceArray[BP] | SQUARE_BBS[startingSquare], pieceArray[BN] & ~SQUARE_BBS[targetSquare]
+			pieceArray[BP] = pieceArray[BP] | SQUARE_BBS[startingSquare]
+			pieceArray[BN] = pieceArray[BN] & ~SQUARE_BBS[targetSquare]
 		elif tag == 9:  # BBPr
-			pieceArray[BP], pieceArray[BB] = pieceArray[BP] | SQUARE_BBS[startingSquare], pieceArray[BB] & ~SQUARE_BBS[targetSquare]
+			pieceArray[BP] = pieceArray[BP] | SQUARE_BBS[startingSquare]
+			pieceArray[BB] = pieceArray[BB] & ~SQUARE_BBS[targetSquare]
 		elif tag == 10:  # BQPr
-			pieceArray[BP], pieceArray[BQ] = pieceArray[BP] | SQUARE_BBS[startingSquare], pieceArray[BQ] & ~SQUARE_BBS[targetSquare]
+			pieceArray[BP] = pieceArray[BP] | SQUARE_BBS[startingSquare]
+			pieceArray[BQ] = pieceArray[BQ] & ~SQUARE_BBS[targetSquare]
 		elif tag == 11:  # BRPr
-			pieceArray[BP], pieceArray[BR] = pieceArray[BP] | SQUARE_BBS[startingSquare], pieceArray[BR] & ~SQUARE_BBS[targetSquare]
+			pieceArray[BP] = pieceArray[BP] | SQUARE_BBS[startingSquare]
+			pieceArray[BR] = pieceArray[BR] & ~SQUARE_BBS[targetSquare]
 		elif tag == 12:  # WNPr
-			pieceArray[WP], pieceArray[WN] = pieceArray[WP] | SQUARE_BBS[startingSquare], pieceArray[WN] & ~SQUARE_BBS[targetSquare]
+			pieceArray[WP] = pieceArray[WP] | SQUARE_BBS[startingSquare]
+			pieceArray[WN] = pieceArray[WN] & ~SQUARE_BBS[targetSquare]
 		elif tag == 13:  # WBPr
-			pieceArray[WP], pieceArray[WB] = pieceArray[WP] | SQUARE_BBS[startingSquare], pieceArray[WB] & ~SQUARE_BBS[targetSquare]
+			pieceArray[WP] = pieceArray[WP] | SQUARE_BBS[startingSquare]
+			pieceArray[WB] = pieceArray[WB] & ~SQUARE_BBS[targetSquare]
 		elif tag == 14:  # WQPr
-			pieceArray[WP], pieceArray[WQ] = pieceArray[WP] | SQUARE_BBS[startingSquare], pieceArray[WQ] & ~SQUARE_BBS[targetSquare]
+			pieceArray[WP] = pieceArray[WP] | SQUARE_BBS[startingSquare]
+			pieceArray[WQ] = pieceArray[WQ] & ~SQUARE_BBS[targetSquare]
 		elif tag == 15:  # WRPr
-			pieceArray[WP], pieceArray[WR] = pieceArray[WP] | SQUARE_BBS[startingSquare], pieceArray[WR] & ~SQUARE_BBS[targetSquare]
+			pieceArray[WP] = pieceArray[WP] | SQUARE_BBS[startingSquare]
+			pieceArray[WR] = pieceArray[WR] & ~SQUARE_BBS[targetSquare]
 		elif tag == 16:  # BNPrCAP
-			pieceArray[BP], pieceArray[BN], pieceArray[captureIndex] = pieceArray[BP] | SQUARE_BBS[startingSquare], pieceArray[BN] & ~SQUARE_BBS[targetSquare], pieceArray[captureIndex] | SQUARE_BBS[targetSquare]
+			pieceArray[BP] = pieceArray[BP] | SQUARE_BBS[startingSquare]
+			pieceArray[BN] = pieceArray[BN] & ~SQUARE_BBS[targetSquare]
+			pieceArray[captureIndex] = pieceArray[captureIndex] | SQUARE_BBS[targetSquare]
 		elif tag == 17:  # BBPrCAP
-			pieceArray[BP], pieceArray[BB], pieceArray[captureIndex] = pieceArray[BP] | SQUARE_BBS[startingSquare], pieceArray[BB] & ~SQUARE_BBS[targetSquare], pieceArray[captureIndex] | SQUARE_BBS[targetSquare]
+			pieceArray[BP] = pieceArray[BP] | SQUARE_BBS[startingSquare]
+			pieceArray[BB] = pieceArray[BB] & ~SQUARE_BBS[targetSquare]
+			pieceArray[captureIndex] = pieceArray[captureIndex] | SQUARE_BBS[targetSquare]
 		elif tag == 18:  # BQPrCAP
-			pieceArray[BP], pieceArray[BQ], pieceArray[captureIndex] = pieceArray[BP] | SQUARE_BBS[startingSquare], pieceArray[BQ] & ~SQUARE_BBS[targetSquare], pieceArray[captureIndex] | SQUARE_BBS[targetSquare]
+			pieceArray[BP] = pieceArray[BP] | SQUARE_BBS[startingSquare]
+			pieceArray[BQ] = pieceArray[BQ] & ~SQUARE_BBS[targetSquare]
+			pieceArray[captureIndex] = pieceArray[captureIndex] | SQUARE_BBS[targetSquare]
 		elif tag == 19:  # BRPrCAP
-			pieceArray[BP], pieceArray[BR], pieceArray[captureIndex] = pieceArray[BP] | SQUARE_BBS[startingSquare], pieceArray[BR] & ~SQUARE_BBS[targetSquare], pieceArray[captureIndex] | SQUARE_BBS[targetSquare]
+			pieceArray[BP] = pieceArray[BP] | SQUARE_BBS[startingSquare]
+			pieceArray[BR] = pieceArray[BR] & ~SQUARE_BBS[targetSquare]
+			pieceArray[captureIndex] = pieceArray[captureIndex] | SQUARE_BBS[targetSquare]
 		elif tag == 20:  # WNPrCAP
-			pieceArray[WP], pieceArray[WN], pieceArray[captureIndex] = pieceArray[WP] | SQUARE_BBS[startingSquare], pieceArray[WN] & ~SQUARE_BBS[targetSquare], pieceArray[captureIndex] | SQUARE_BBS[targetSquare]
+			pieceArray[WP] = pieceArray[WP] | SQUARE_BBS[startingSquare]
+			pieceArray[WN] = pieceArray[WN] & ~SQUARE_BBS[targetSquare]
+			pieceArray[captureIndex] = pieceArray[captureIndex] | SQUARE_BBS[targetSquare]
 		elif tag == 21:  # WBPrCAP
-			pieceArray[WP], pieceArray[WB], pieceArray[captureIndex] = pieceArray[WP] | SQUARE_BBS[startingSquare], pieceArray[WB] & ~SQUARE_BBS[targetSquare], pieceArray[captureIndex] | SQUARE_BBS[targetSquare]
+			pieceArray[WP] = pieceArray[WP] | SQUARE_BBS[startingSquare]
+			pieceArray[WB] = pieceArray[WB] & ~SQUARE_BBS[targetSquare]
+			pieceArray[captureIndex] = pieceArray[captureIndex] | SQUARE_BBS[targetSquare]
 		elif tag == 22:  # WQPrCAP
-			pieceArray[WP], pieceArray[WQ], pieceArray[captureIndex] = pieceArray[WP] | SQUARE_BBS[startingSquare], pieceArray[WQ] & ~SQUARE_BBS[targetSquare], pieceArray[captureIndex] | SQUARE_BBS[targetSquare]
+			pieceArray[WP] = pieceArray[WP] | SQUARE_BBS[startingSquare]
+			pieceArray[WQ] = pieceArray[WQ] & ~SQUARE_BBS[targetSquare]
+			pieceArray[captureIndex] = pieceArray[captureIndex] | SQUARE_BBS[targetSquare]
 		elif tag == 23:  # WRPrCAP
-			pieceArray[WP], pieceArray[WR], pieceArray[captureIndex] = pieceArray[WP] | SQUARE_BBS[startingSquare], pieceArray[WR] & ~SQUARE_BBS[targetSquare], pieceArray[captureIndex] | SQUARE_BBS[targetSquare]
+			pieceArray[WP] = pieceArray[WP] | SQUARE_BBS[startingSquare]
+			pieceArray[WR] = pieceArray[WR] & ~SQUARE_BBS[targetSquare]
+			pieceArray[captureIndex] = pieceArray[captureIndex] | SQUARE_BBS[targetSquare]
 		elif tag == 24:  # WDouble
 			pieceArray[WP] = (pieceArray[WP] | SQUARE_BBS[startingSquare]) & ~SQUARE_BBS[targetSquare]
 		elif tag == 25:  # BDouble
@@ -3082,6 +2985,7 @@ def RunPerftInline(depth: int): #{
 
 SetStartingPosition();
 PrintBoard();
-
+# import cProfile
+# cProfile.run("RunPerftInline(5)")
 RunPerftInline(6);
 input();
